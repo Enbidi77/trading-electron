@@ -4,11 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node scripts/dev.js",
+    "dev:web": "vite",
+    "dev:electron": "node scripts/dev.js",
     "build:electron": "tsc -p tsconfig.electron.json",
     "build:renderer": "vite build",
     "build": "vite build && tsc -p tsconfig.electron.json",
-    "dev:electron": "tsc -p tsconfig.electron.json && electron .",
     "preview": "vite preview"
   },
   "main": "dist-electron/main/main.js",

@@ -57,9 +57,12 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="h-12 w-full flex items-center justify-between px-3 bg-[#0d131f]/80 dark:bg-[#090d16]/80 backdrop-blur-xl border-b border-white/10 select-none z-30">
+    <header
+      style={{ WebkitAppRegion: 'drag' } as any}
+      className="h-12 w-full flex items-center justify-between px-3 bg-[#0d131f]/80 dark:bg-[#090d16]/80 backdrop-blur-xl border-b border-white/10 select-none z-30"
+    >
       {/* Left: Branding & Symbol Picker */}
-      <div className="flex items-center gap-3">
+      <div style={{ WebkitAppRegion: 'no-drag' } as any} className="flex items-center gap-3">
         {/* App Title / Logo */}
         <div className="flex items-center gap-2 pr-2 border-r border-white/10">
           <div className="w-6 h-6 rounded-md bg-gradient-to-tr from-sky-500 via-indigo-500 to-emerald-400 p-[1px] shadow-sm shadow-sky-500/20">
@@ -143,7 +146,7 @@ export const Header: React.FC = () => {
       </div>
 
       {/* Center: Timeframe Pills & Layout Selector */}
-      <div className="flex items-center gap-1.5">
+      <div style={{ WebkitAppRegion: 'no-drag' } as any} className="flex items-center gap-1.5">
         {/* Timeframes */}
         <div className="flex items-center p-0.5 rounded-lg bg-black/20 border border-white/5">
           {TIMEFRAMES.slice(0, 6).map((tf) => (
@@ -181,7 +184,7 @@ export const Header: React.FC = () => {
       </div>
 
       {/* Right: Quick Search, Balance, Risk, Theme & Window Controls */}
-      <div className="flex items-center gap-2">
+      <div style={{ WebkitAppRegion: 'no-drag' } as any} className="flex items-center gap-2">
         {/* Global Search Button */}
         <button
           onClick={() => setCommandPaletteOpen(true)}

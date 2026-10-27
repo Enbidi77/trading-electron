@@ -15,12 +15,8 @@ function createWindow() {
     minHeight: 700,
     title: 'TRD Pro — Terminal',
     backgroundColor: '#070a11',
+    frame: false,
     titleBarStyle: 'hidden',
-    titleBarOverlay: {
-      color: '#070a11',
-      symbolColor: '#94a3b8',
-      height: 38
-    },
     webPreferences: {
       preload: path.join(__dirname, '../preload/preload.js'),
       contextIsolation: true,

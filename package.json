@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm --filter @trd/desktop dev",
+    "dev:web": "pnpm --filter @trd/desktop dev:web",
     "dev:electron": "pnpm --filter @trd/desktop dev:electron",
     "build": "pnpm -r build",
     "test": "vitest run",
@@ -14,5 +15,11 @@
   "devDependencies": {
     "typescript": "^5.7.3",
     "vitest": "^3.0.5"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "electron",
+      "esbuild"
+    ]
   }
 }

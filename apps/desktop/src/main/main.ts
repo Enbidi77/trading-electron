@@ -1,11 +1,22 @@
 import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 let mainWindow: BrowserWindow | null = null;
+
+function getPreloadPath(): string {
+  const cjsPath = path.join(__dirname, '../preload/preload.cjs');
+  if (fs.existsSync(cjsPath)) return cjsPath;
+
+  const srcCjsPath = path.join(__dirname, '../../src/preload/preload.cjs');
+  if (fs.existsSync(srcCjsPath)) return srcCjsPath;
+
+  return path.join(__dirname, '../preload/preload.js');
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -15,10 +26,9 @@ function createWindow() {
     minHeight: 700,
     title: 'TRD Pro — Terminal',
     backgroundColor: '#070a11',
-    frame: false,
-    titleBarStyle: 'hidden',
+    autoHideMenuBar: true,
     webPreferences: {
-      preload: path.join(__dirname, '../preload/preload.js'),
+      preload: getPreloadPath(),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true
@@ -32,6 +42,18 @@ function createWindow() {
   } else {
     mainWindow.loadFile(path.join(__dirname, '../../dist/index.html'));
   }
+
+  // Keyboard shortcuts: Ctrl+W to close window, Ctrl+Q to quit
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if ((input.control || input.meta) && input.key.toLowerCase() === 'w') {
+      mainWindow?.close();
+      event.preventDefault();
+    }
+    if ((input.control || input.meta) && input.key.toLowerCase() === 'q') {
+      app.quit();
+      event.preventDefault();
+    }
+  });
 
   // Prevent external redirects inside window
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {

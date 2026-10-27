@@ -2,6 +2,7 @@ import { spawn } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import http from 'http';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -39,6 +40,12 @@ async function start() {
       else reject(new Error(`tsc exited with code ${code}`));
     });
   });
+
+  // Ensure preload.cjs is in dist-electron/preload/
+  const srcPreload = path.resolve(rootDir, 'src/preload/preload.cjs');
+  const destPreloadDir = path.resolve(rootDir, 'dist-electron/preload');
+  if (!fs.existsSync(destPreloadDir)) fs.mkdirSync(destPreloadDir, { recursive: true });
+  fs.copyFileSync(srcPreload, path.resolve(destPreloadDir, 'preload.cjs'));
 
   console.log('[TRD Pro] Starting Vite development server...');
   const viteProcess = spawn('pnpm', ['exec', 'vite'], {

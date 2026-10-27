@@ -1,30 +1,16 @@
 import { spawn } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import http from 'http';
 import fs from 'fs';
+import { createServer } from 'vite';
+import electronPath from 'electron';
+
+// Ensure Electron doesn't run in Node mode if invoked from an environment with ELECTRON_RUN_AS_NODE
+delete process.env.ELECTRON_RUN_AS_NODE;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
-
-function waitForServer(url, timeout = 30000) {
-  const start = Date.now();
-  return new Promise((resolve, reject) => {
-    const check = () => {
-      http.get(url, (res) => {
-        resolve();
-      }).on('error', () => {
-        if (Date.now() - start > timeout) {
-          reject(new Error(`Timed out waiting for ${url}`));
-        } else {
-          setTimeout(check, 300);
-        }
-      });
-    };
-    check();
-  });
-}
 
 async function start() {
   console.log('[TRD Pro] Compiling Electron main and preload scripts...');
@@ -48,31 +34,36 @@ async function start() {
   fs.copyFileSync(srcPreload, path.resolve(destPreloadDir, 'preload.cjs'));
 
   console.log('[TRD Pro] Starting Vite development server...');
-  const viteProcess = spawn('pnpm', ['exec', 'vite'], {
-    cwd: rootDir,
-    shell: true,
-    stdio: 'inherit'
+  const viteServer = await createServer({
+    root: rootDir,
+    configFile: path.resolve(rootDir, 'vite.config.ts')
   });
+  await viteServer.listen();
+  viteServer.printUrls();
 
-  const devUrl = 'http://localhost:5173';
-  await waitForServer(devUrl);
-  console.log(`[TRD Pro] Vite server is ready at ${devUrl}`);
+  const devUrl = viteServer.resolvedUrls?.local[0] || 'http://localhost:5173';
 
-  console.log('[TRD Pro] Launching Electron window...');
-  const electronProcess = spawn('pnpm', ['exec', 'electron', '.'], {
+  console.log(`[TRD Pro] Launching Electron window pointing to ${devUrl}...`);
+  const electronEnv = {
+    ...process.env,
+    VITE_DEV_SERVER_URL: devUrl,
+    NODE_ENV: 'development'
+  };
+  delete electronEnv.ELECTRON_RUN_AS_NODE;
+
+  const electronProcess = spawn(electronPath, ['.'], {
     cwd: rootDir,
-    shell: true,
     stdio: 'inherit',
-    env: {
-      ...process.env,
-      VITE_DEV_SERVER_URL: devUrl,
-      NODE_ENV: 'development'
-    }
+    env: electronEnv
   });
 
-  const cleanup = () => {
-    viteProcess.kill();
-    electronProcess.kill();
+  const cleanup = async () => {
+    try {
+      await viteServer.close();
+    } catch (_) {}
+    try {
+      if (!electronProcess.killed) electronProcess.kill();
+    } catch (_) {}
     process.exit(0);
   };
 

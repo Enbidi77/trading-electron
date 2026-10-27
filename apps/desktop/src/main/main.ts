@@ -26,7 +26,10 @@ function createWindow() {
     minHeight: 700,
     title: 'TRD Pro — Terminal',
     backgroundColor: '#070a11',
+    frame: false,
+    titleBarStyle: 'hidden',
     autoHideMenuBar: true,
+    show: true,
     webPreferences: {
       preload: getPreloadPath(),
       contextIsolation: true,
@@ -42,6 +45,10 @@ function createWindow() {
   } else {
     mainWindow.loadFile(path.join(__dirname, '../../dist/index.html'));
   }
+
+  mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL) => {
+    console.error(`Failed to load ${validatedURL}: ${errorDescription} (${errorCode})`);
+  });
 
   // Keyboard shortcuts: Ctrl+W to close window, Ctrl+Q to quit
   mainWindow.webContents.on('before-input-event', (event, input) => {

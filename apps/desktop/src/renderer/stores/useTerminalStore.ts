@@ -283,8 +283,8 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
 
   toggleTheme: async () => {
     const { settings } = get();
-    const newTheme = settings.theme === 'dark' ? 'light' : 'dark';
-    const updated = { ...settings, theme: newTheme };
+    const newTheme: 'dark' | 'light' = settings.theme === 'dark' ? 'light' : 'dark';
+    const updated: UserSettings = { ...settings, theme: newTheme };
     await persistence.saveSettings(updated);
 
     const root = document.documentElement;

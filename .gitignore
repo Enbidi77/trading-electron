@@ -8,6 +8,15 @@ dist-electron
 build
 out
 release
+.next
+.turbo
+
+# TypeScript
+*.tsbuildinfo
+
+# Coverage & Tests
+coverage
+.nyc_output
 
 # Logs
 npm-debug.log*

@@ -127,6 +127,61 @@ export class LocalStoragePersistenceAdapter implements IPersistenceAdapter {
   }
 }
 
+export class HttpPersistenceAdapter implements IPersistenceAdapter {
+  private baseUrl: string;
+  private fallback: LocalStoragePersistenceAdapter;
+
+  constructor(baseUrl: string = '/api/workspace') {
+    this.baseUrl = baseUrl;
+    this.fallback = new LocalStoragePersistenceAdapter();
+  }
+
+  public async get<T>(key: string, defaultValue: T): Promise<T> {
+    try {
+      if (typeof window !== 'undefined') {
+        const res = await fetch(`${this.baseUrl}?key=${encodeURIComponent(key)}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data !== undefined) return json.data as T;
+        }
+      }
+    } catch (e) {
+      console.warn(`[HttpPersistenceAdapter] Fetch failed for ${key}, using fallback:`, e);
+    }
+    return this.fallback.get(key, defaultValue);
+  }
+
+  public async set<T>(key: string, value: T): Promise<void> {
+    await this.fallback.set(key, value);
+    try {
+      if (typeof window !== 'undefined') {
+        await fetch(this.baseUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key, value })
+        });
+      }
+    } catch (e) {
+      console.warn(`[HttpPersistenceAdapter] Save failed for ${key}:`, e);
+    }
+  }
+
+  public async remove(key: string): Promise<void> {
+    await this.fallback.remove(key);
+    try {
+      if (typeof window !== 'undefined') {
+        await fetch(`${this.baseUrl}?key=${encodeURIComponent(key)}`, { method: 'DELETE' });
+      }
+    } catch (e) {
+      console.warn(`[HttpPersistenceAdapter] Remove failed for ${key}:`, e);
+    }
+  }
+
+  public async clear(): Promise<void> {
+    await this.fallback.clear();
+  }
+}
+
 export class WorkspacePersistenceService {
   private adapter: IPersistenceAdapter;
 

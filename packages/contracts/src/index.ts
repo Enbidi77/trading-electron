@@ -327,3 +327,76 @@ export const WatchlistSchema = z.object({
   symbols: z.array(z.string())
 });
 export type Watchlist = z.infer<typeof WatchlistSchema>;
+
+// ==========================================
+// Authentication & Session Contracts
+// ==========================================
+
+export const UserRoleSchema = z.enum(['trader', 'pro', 'admin']);
+export type UserRole = z.infer<typeof UserRoleSchema>;
+
+export const UserSchema = z.object({
+  id: z.string(),
+  email: z.string().email(),
+  name: z.string().min(1),
+  role: UserRoleSchema.default('pro'),
+  avatarUrl: z.string().optional(),
+  createdAt: z.number()
+});
+export type User = z.infer<typeof UserSchema>;
+
+export const UserSessionSchema = z.object({
+  sessionId: z.string(),
+  user: UserSchema,
+  expiresAt: z.number(),
+  createdAt: z.number()
+});
+export type UserSession = z.infer<typeof UserSessionSchema>;
+
+export const LoginRequestSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters')
+});
+export type LoginRequest = z.infer<typeof LoginRequestSchema>;
+
+export const RegisterRequestSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters')
+});
+export type RegisterRequest = z.infer<typeof RegisterRequestSchema>;
+
+export const AuthResponseSchema = z.object({
+  success: z.boolean(),
+  user: UserSchema.optional(),
+  token: z.string().optional(),
+  message: z.string().optional(),
+  error: z.string().optional()
+});
+export type AuthResponse = z.infer<typeof AuthResponseSchema>;
+
+// ==========================================
+// Workspace Persistence Contracts
+// ==========================================
+
+export const WorkspaceStateSchema = z.object({
+  settings: UserSettingsSchema,
+  watchlists: z.array(WatchlistSchema),
+  drawings: z.record(z.string(), z.array(ChartDrawingSchema)).default({}),
+  indicators: z.array(IndicatorConfigSchema).default([]),
+  version: z.number().default(1),
+  updatedAt: z.number()
+});
+export type WorkspaceState = z.infer<typeof WorkspaceStateSchema>;
+
+// ==========================================
+// Generic API Envelope Contracts
+// ==========================================
+
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  timestamp: number;
+}
+

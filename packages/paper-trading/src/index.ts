@@ -94,6 +94,7 @@ export class PaperBroker extends TypedEventEmitter<PaperBrokerEvents> implements
       stopPrice: req.stopPrice,
       timeInForce: 'GTC',
       status: 'OPEN',
+      fee: 0,
       stopLossPrice: req.stopLossPrice,
       takeProfitPrice: req.takeProfitPrice,
       createdAt: now,

@@ -24,11 +24,11 @@ export const TimeAndSales: React.FC = () => {
         {recentTrades.length === 0 ? (
           <div className="p-4 text-center text-xs text-slate-500">Awaiting live trade tape prints...</div>
         ) : (
-          recentTrades.map((t) => {
+          recentTrades.map((t, index) => {
             const isBuy = t.side === 'buy';
             return (
               <div
-                key={t.id}
+                key={`${t.id}-${index}`}
                 className="grid grid-cols-3 px-3 py-0.5 items-center hover:bg-white/5 transition-colors"
               >
                 <span className="text-left text-slate-400 text-[10px]">{formatTime(t.timestamp)}</span>
